@@ -1,0 +1,57 @@
+\section{Practical Considerations}
+\label{sec:practical}
+
+Modern 802.11 systems use OFDM, we will use BPSK/QPSK for simplicity.
+
+1. OFDM: Segmentation of packet is done depending on the size of the ofdm symbol.
+(a) Zigzag cannot be applied to OFDM systems because OFDM symbols are not chunk decodable. 
+(b) However, there are solutions to this issue given in [?] and [?] etc.
+(c) For simplicity, we use BPSK/QPSK.
+
+2. Applying Folding to Higher Order Modulation (M-QAM)
+(a) Folding extends to higher modulations as well.
+
+3. Capture Effect
+(a) Capture effect occurs when user A has a much higher SNR than user B; hence, the receiver decodes user A first and treats user B as noise. 
+(b) We do not consider the capture effect results.
+
+4. Detecting multiple collisions 
+(a) Use the correlation approach proposed by zigzag
+
+5. Channel Estimation
+(a) Flat Fading Model (Current Model we are Assuming):
+
+\begin{equation}
+\label{eq:flat}
+y[n]=H_{1}x_{1}[n]+H_{2}x_{2}[n]+w[n]
+\end{equation}
+
+i. slow flat-fading channel, gaussian noise
+
+(b) Frequency Selective Fading Model:
+
+\begin{equation}
+\label{eq:selective}
+y[n]=h_{1}[n]*x_{1}[n]+h_{2}[n]*x_{2}[n]+w[n]
+\end{equation}
+
+i. Equalization is substantially more complicated as compared to flat fading case.
+ii. The most recent 802.11 standard uses OFDM.
+iii. There are several ways to estimate the channel (i.e. preamble, pilot symbols)
+
+(c) It turns out that the channel (i.e. as measured by the USRP) we observe is flat and slowly varying. 
+(d) Since we are using BPSK/QPSK, channel estimation is accomplished by using an AGC and PLL
+
+6. Frequency offset estimation // Fine Channel and Phase Estimation
+(a) Costas PLL 
+(b) Band-Edge Filter
+
+7. Timing Offset Estimation
+(a) Gardner Timing Algorithm
+(b) Polyphase Filter Bank Estimation
+
+8. Successive Interference Cancellation
+(a) Use the folded linear combinations combined with SiC to recover original packet.
+
+9. Generalization to three or more nodes.
+(a) Use a run-length limited type of code, such that there is always a minimum distance between symbols used for ``folding''.

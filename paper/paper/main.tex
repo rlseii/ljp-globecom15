@@ -1,0 +1,55 @@
+\documentclass{sig-alternate}
+\setlength{\pdfpagewidth}{8.5in}
+\setlength{\pdfpageheight}{11in}
+
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{times}
+\usepackage{color}
+\usepackage{verbatim}
+\usepackage{booktabs}
+\usepackage{url}
+
+\bibliographystyle{acm}
+% More text, less whitespace.
+\renewcommand\floatpagefraction{1}
+\renewcommand\topfraction{1}
+\renewcommand\bottomfraction{1}
+\renewcommand\textfraction{0}   
+
+% For notes to authors
+\definecolor{editcolor}{rgb}{0,0,0.75} % A darker blue 
+\definecolor{notecolor}{rgb}{0.75,0,0} % A darker red
+\newcommand{\note}[1]{{\textcolor{notecolor}{[\textit{#1}]}}}
+\newcommand{\edit}[1]{{\textcolor{editcolor}{#1}}}
+\sloppy
+
+\newfont{\mycrnotice}{ptmr8t at 7pt}
+\newfont{\myconfname}{ptmri8t at 7pt}
+\let\crnotice\mycrnotice%
+\let\confname\myconfname%
+
+\clubpenalty=10000
+\widowpenalty = 10000
+
+\begin{document}
+\newcommand{\roxor}{RoXOR}
+\title{\roxor: Re-Thinking Retransmissions in WiFi}
+\author{Mobicom 2015 Paper \#166}
+\maketitle
+\input{abstract}
+\input{introduction}
+\input{related}
+\input{decode}
+\input{practical}
+\input{impl}
+\input{eval}
+\input{conclusion}
+
+{
+\small
+\bibliography{refs}{}
+}
+%\input{app}
+\end{document}
+
