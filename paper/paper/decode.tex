@@ -1,125 +1,82 @@
-\section{Motivation}
-\label{sec:motivation}
+\section{The RoXOR Protocol}
+\label{sec:htproblem}
+In this section, we provide details of how RoXOR encodes the incremental redundancy and how RoXOR jointly decodes the retransmitted packet and the original corrupted packet using successive interference cancellation.Throughout our discussion, we assume that the network operates at a high SNR so that most packet errors are due to interference from other users. We assume no side information and focus on a protocol based on retransmissions.
 
-\subsection{Channel Model}
-\label{sec:model}
+\subsection{Structured Encoding}
+One of the code parameters is $\beta$, $0\leq\beta\leq1$, which controls the amount of incremental redundancy. For a length $L$ packet, the original information bits are given by samples $x_1,x_2,...,x_L$ while the code bits are given by $c_1,c_2,...,c_n$. For a parameter $\beta$, the length of the codeword becomes $int(\beta n)$. Therefore, the final code is given by:
+\begin{equation}
+c_i = 
+\begin{cases}
+x_{i} + x_{L-i} & \beta \leq 0.5 \\
+x_{i} + x_{i+\frac{L}{2}} & \beta > 0.5
+\end{cases}
+\end{equation}
 
-\begin{enumerate}
-	\item The Assumed Channel Model
-	\begin{enumerate}
-		\item WiFi networks operate at high SNR.
-		\item Most packet errors are due to interference from other users.
-	\end{enumerate}
+	
+\emph{How is Folding Applied for (Degree n)?} 
+\begin{itemize}
+    \item Maximum Distance between any 2 data symbols is defined as: $D_{m}\doteq int(\frac{N}{n})$.
+    \item Step size s, $s\doteq mod(i-1,D_m)$.
+    \item Increment size t, $t\doteq mod(int(\frac{i}{D_m}),n)$
+\end{itemize}
 
-	\item Interference between two users
-	\begin{enumerate}
-		\item Either user A or user B starts to transmit first, etc...
-	\end{enumerate}
+\begin{equation}
+        c_i = \begin{cases}
+                \sum_{k=0}^{n-1}x_{1+s+(D_m-t)k} & s \leq \frac{D_m}{2} \\
+                \sum_{k=0}^{n-1}x_{N-s+(D_m-t)k} & s > \frac{D_m}{2}
+        \end{cases}
+\end{equation}
 
-\subsection{Sending Incremental Redundancy}
-\label{sec:ir}
+%Generalizing, define $\beta=\frac{L}{N}$, as the degree of the incremental redundancy. For example a degree-two code uses the binary addition of two data bits in the original packet for one code-bit of the retransmitted packet. 
 
-	\item A System of linear equations
-	\begin{enumerate}	
-		\item Decoding involves solving for n-unknowns and this is possible when the access point receives at least n-independent equations
-		\item <Insert Analysis of necessary number of equations needed for successful decode>
-	\end{enumerate}
+\subsection{Structured Decoding}
+\label{sec:DecodeSection}
 
-	\item Ways to Send Incremental Redundancy
-	\begin{enumerate}	
-		\item How much to send? (Zigzag sends $\beta=1$)
-		\item The degree to send? (Zigzag uses degree 1)
-	\end{enumerate}
-
-\subsection{Code Structure}
-\label{sec:structure}
-
-	\item Random Codes
-	\begin{enumerate}	
-		\item These types of codes are known to do well for i.i.d. noise channels.
-		\item In order to get benefits of randomness, it is necessary to increase the degree to a moderately high value.
-		\item In addition, increasing the degree also increases the encoding/decoding complexity.
-	\end{enumerate}
-
-	\begin{figure}[t]
+\begin{figure}[t]
+	\label{fig:roxor_decode}	
 	\centering
 	\vspace*{-0.1in}
-	\subfigure[Performance of Random Code vs. Degree d] {
-	\includegraphics[width=.9\columnwidth]{./figs/prob_rndCode_deg_1to10.png}
-	\label{fig:random_vs_d}
-	}
+	\includegraphics[width=.9\columnwidth]{./figs/roxor_timing_diagram_decoding.pdf}
 	\vskip -0.5em
-	\caption{Probability of Success on First Re-Transmission (Random Code) ($\beta=0.75$)}
-	%\vskip -1em
-	\end{figure}
+	\caption{The RoXOR decoding process for $\beta=0.5$}
+	\vskip -1em
+\end{figure}
 
-	\item Structured Codes
-	\begin{enumerate}	
-		\item Is there some way to get performance close to that of random codes with less complexity?
-	\end{enumerate}
+The decoding process is illustrated in figure~\ref{fig:roxor_decode} where the numbers on the bubbles indicate the particular decode order. This figure shows the original packet being interfered with and the smaller re-transmitted packets of size $\beta$. First, the clean portions of both the transmitted packets are decoded, and then the system applies successive interference cancellation to iteratively decode previously corrupted chunks. This process continues until all of the bits from the original packets are decoded and pass the CRC check. This example, although simplified, gives intuition behind the RoXOR decoding process. Furthermore, it shows that it is rather conservative to send 100\% of the original packet on re-transmission, as RoXOR was able to decode using only about 50\%.
 
-	\begin{figure}[t]
-	\centering
-	\vspace*{-0.1in}
-	\subfigure[Comparison of Fold Performance vs. Random] {
-	\includegraphics[width=.9\columnwidth]{./figs/prob_newCode_success_2users_b25to100.png}
-	\label{fig:fold_2user}
-	}
-	\vskip -0.5em
-	\caption{Probability of Success on First Re-Transmission (Folding)}
-	%\vskip -1em
-	\end{figure}
-
+\subsection{Small Packet Sizes}
+\label{sec:small_packet}
 
 \begin{enumerate}
-	\item How is Folding Applied (Degree 2)?
-	\begin{enumerate}
-		\item The code has one parameter $\beta$, $0\leq\beta\leq1$, which controls the amount of incremental redundancy.
-		\item For a length N packet, the original bits are given by samples $x_1,x_2,...,x_N$ while the code bits are given by $c_1,c_2,...,c_N$.
-		\item For a parameter $\beta$, the length of the codeword becomes $int(\beta n)$.
-		\item $\beta\leq 0.5$
-		\begin{enumerate}
-			\item  $c_i=x_{i} + x_{N-i}$
-		\end{enumerate}
-		\item $\beta>0.5$
-		\begin{enumerate}
-			\item  $c_i=x_{i} + x_{i+\frac{N}{2}}$
-		\end{enumerate}
-	\end{enumerate}
+    \item In the case of small packets, the re-transmission overhead could be significant.
+    \item When the MAC overhead is not negligible is it better to send using a stronger FEC?
+    \item The most appropriate type of FEC would be a burst error correction code. 
+\end{enumerate}
 
+\textbf{Rieger Bound} Consider a linear code with parameters $(n,k)$, where $k$ is the information block size, and $n$ is the code block size. The burst error correcting ability of an $(n,k)$ linear block code is then $2l \leq n-k$, therefore:
+\begin{equation}
+l \leq \frac{(n-k)}{2}
+\end{equation}
+
+\begin{enumerate}
+    \item Assuming we use an optimal burst correction code, which scheme has better mean delay? RoXOR or 802.11x with stronger FEC?
+\end{enumerate}
+
+\subsection{Large Packet Sizes}
+\label{sec:large_packet}
+
+\begin{enumerate}
+    \item For large packet sizes, MAC overhead is negligible, hence, it is reasonable to send a re-transmission packet more than once.
+\end{enumerate}
+
+\subsection{Three or More Users}
+\label{sec:three_users}
+
+\begin{enumerate}
 	\item How does this work with 3 or more users?
 	\begin{enumerate}
 		\item Folding using degree 2 performs similarly to random codes of degree $4\sim6$.
 	\end{enumerate}
 
-	\begin{figure}[t]
-	\centering
-	\vspace*{-0.1in}
-	\subfigure[Comparison of Fold Performance vs. Random] {
-	\includegraphics[width=.9\columnwidth]{./figs/prob_rndCode_b25to100_deg2to6_R4_3users.png}
-	\label{fig:fold_2user}
-	}
-	\vskip -0.5em
-	\caption{Probability of Success on First Re-Transmission}
-	%\vskip -1em
-	\end{figure}
-
  \end{enumerate}
-\end{enumerate}
 
-
-
-
-%%	\item How is Folding Applied for (Degree n)?
-%%	\begin{enumerate}
-%%		\item Maximum Distance between any 2 data symbols is defined as: $D_{m}\doteq int(\frac{N}{n})$.
-%%		\item Step size s, $s\doteq mod(i-1,D_m)$.
-%%		\item Increment size t, $t\doteq mod(int(\frac{i}{D_m}),n)$
-%%		\item ($s \leq \frac{D_m}{2}$)
-%%		\begin{enumerate}
-%%			\item $c_i=\sum_{k=0}^{n-1}x_{1+s+(D_m-t)k}$
-%%		\end{enumerate}
-%%		\item ($s > \frac{D_m}{2}$)
-%%		\begin{enumerate}
-%%			\item $c_i=\sum_{k=0}^{n-1}x_{N-s+(D_m-t)k}$
-%%		\end{enumerate}
